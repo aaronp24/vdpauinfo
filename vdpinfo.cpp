@@ -111,7 +111,7 @@ void queryVideoSurface(VDPDeviceImpl *device)
     printf("-------------------------------------------\n");
     for(int x=0; x<chroma_type_count; ++x)
     {
-        VdpBool is_supported;
+        VdpBool is_supported = false;
         uint32_t max_width, max_height;
 
         rv = device->VideoSurfaceQueryCapabilities(device->device, chroma_types[x].id, 
@@ -123,6 +123,7 @@ void queryVideoSurface(VDPDeviceImpl *device)
             /* Find out supported formats */
             for(int y=0; y<ycbcr_type_count; ++y)
             {
+                is_supported = false;
                 rv = device->VideoSurfaceQueryGetPutBitsYCbCrCapabilities(
                     device->device, chroma_types[x].id, ycbcr_types[y].id,
                     &is_supported);
@@ -159,6 +160,7 @@ void queryOutputSurface(VDPDeviceImpl *device)
             /* Find out supported formats */
             for(int y=0; y<ycbcr_type_count; ++y)
             {
+                is_supported = false;
                 rv = device->OutputSurfaceQueryPutBitsYCbCrCapabilities(
                     device->device, chroma_types[x].id, ycbcr_types[y].id,
                     &is_supported);
@@ -180,7 +182,7 @@ void queryBitmapSurface(VDPDeviceImpl *device)
     VdpStatus rv;
     printf("\nBitmap surface:\n\n");
     printf("name              width height\n");
-    printf("-------------------------------------------\n");
+    printf("------------------------------\n");
     for(int x=0; x<rgb_type_count; ++x)
     {
         VdpBool is_supported;
@@ -250,12 +252,12 @@ void queryVideoMixer(VDPDeviceImpl *device)
 {
     VdpStatus rv;
     printf("\nVideo mixer:\n\n");
-    // Features
+   // Features
     printf("feature name                    sup\n");
     printf("------------------------------------\n");
     for(int x=0; x<mixer_features_count; ++x)
     {
-        VdpBool is_supported = false; /* There seems to be a bug in VideoMixerQueryFeatureSupport, is_supported sometimes isn't written even though the operation was succesfuls */
+        VdpBool is_supported = true; /* There seems to be a bug in VideoMixerQueryFeatureSupport, is_supported is only set if the feature is not supported */
         rv = device->VideoMixerQueryFeatureSupport(device->device, mixer_features[x].id, 
             &is_supported);
         is_supported = (rv == VDP_STATUS_OK && is_supported);
@@ -269,7 +271,7 @@ void queryVideoMixer(VDPDeviceImpl *device)
     printf("-----------------------------------------------------\n");
     for(int x=0; x<mixer_parameters_count; ++x)
     {
-        VdpBool is_supported;
+        VdpBool is_supported = false;
 
         rv = device->VideoMixerQueryParameterSupport(device->device, mixer_parameters[x].id, 
             &is_supported);
@@ -293,7 +295,7 @@ void queryVideoMixer(VDPDeviceImpl *device)
     printf("-----------------------------------------------------\n");
     for(int x=0; x<mixer_attributes_count; ++x)
     {
-        VdpBool is_supported;
+        VdpBool is_supported = false;
 
         rv = device->VideoMixerQueryAttributeSupport(device->device, mixer_attributes[x].id, 
             &is_supported);
@@ -336,7 +338,7 @@ void queryDecoderCaps(VDPDeviceImpl *device)
     printf("------------------------------------\n");
     for(int x=0; x<decoder_profile_count; ++x)
     {
-        VdpBool is_supported;
+        VdpBool is_supported = false;
         uint32_t max_level, max_references, max_width, max_height;
 
         rv = device->DecoderQueryCapabilities(device->device, decoder_profiles[x].id, 
@@ -355,7 +357,7 @@ int main(int argc, char **argv)
     /* Create an X Display */
     Display *display;
     int screen;
-    char *display_name = NULL;
+    char *display_name = XDisplayName(NULL);
     if ((display=XOpenDisplay(display_name)) == NULL)
     {
         fprintf(stderr,"vdpinfo: cannot connect to X server %s\n",
