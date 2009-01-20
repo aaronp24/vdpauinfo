@@ -1,6 +1,6 @@
 /* 
 Query and display NVIDIA VDPAU capabilities, a la glxinfo 
-version 0.0.1
+version 0.0.2
 
 Copyright (c) 2008 Wladimir J. van der Laan
 
@@ -59,6 +59,7 @@ struct Desc
 {
     const char *name;
     uint32_t id;
+    uint32_t aux; /* optional extra parameter... */
 };
 
 /**************** Video surface ************/
@@ -197,6 +198,15 @@ void queryBitmapSurface(VDPDeviceImpl *device)
 
 /******************* Video mixer ****************/
 
+/* Type for value ranges */
+enum DataType
+{
+    DT_NONE,
+    DT_INT,
+    DT_UINT,
+    DT_FLOAT
+};
+
 Desc mixer_features[] = {
 {"DEINTERLACE_TEMPORAL",VDP_VIDEO_MIXER_FEATURE_DEINTERLACE_TEMPORAL},
 {"DEINTERLACE_TEMPORAL_SPATIAL",VDP_VIDEO_MIXER_FEATURE_DEINTERLACE_TEMPORAL_SPATIAL},
@@ -208,22 +218,33 @@ Desc mixer_features[] = {
 const size_t mixer_features_count = sizeof(mixer_features)/sizeof(Desc);
 
 Desc mixer_parameters[] = {
-{"VIDEO_SURFACE_WIDTH",VDP_VIDEO_MIXER_PARAMETER_VIDEO_SURFACE_WIDTH},
-{"VIDEO_SURFACE_HEIGHT",VDP_VIDEO_MIXER_PARAMETER_VIDEO_SURFACE_HEIGHT},
-{"CHROMA_TYPE",VDP_VIDEO_MIXER_PARAMETER_CHROMA_TYPE},
-{"LAYERS",VDP_VIDEO_MIXER_PARAMETER_LAYERS},
+{"VIDEO_SURFACE_WIDTH",VDP_VIDEO_MIXER_PARAMETER_VIDEO_SURFACE_WIDTH,DT_UINT},
+{"VIDEO_SURFACE_HEIGHT",VDP_VIDEO_MIXER_PARAMETER_VIDEO_SURFACE_HEIGHT,DT_UINT},
+{"CHROMA_TYPE",VDP_VIDEO_MIXER_PARAMETER_CHROMA_TYPE,DT_NONE},
+{"LAYERS",VDP_VIDEO_MIXER_PARAMETER_LAYERS,DT_UINT},
 };
 const size_t mixer_parameters_count = sizeof(mixer_parameters)/sizeof(Desc);
 
 Desc mixer_attributes[] = {
-{"BACKGROUND_COLOR",VDP_VIDEO_MIXER_ATTRIBUTE_BACKGROUND_COLOR},
-{"CSC_MATRIX",VDP_VIDEO_MIXER_ATTRIBUTE_CSC_MATRIX},
-{"NOISE_REDUCTION_LEVEL",VDP_VIDEO_MIXER_ATTRIBUTE_NOISE_REDUCTION_LEVEL},
-{"SHARPNESS_LEVEL",VDP_VIDEO_MIXER_ATTRIBUTE_SHARPNESS_LEVEL},
-{"LUMA_KEY_MIN_LUMA",VDP_VIDEO_MIXER_ATTRIBUTE_LUMA_KEY_MIN_LUMA},
-{"LUMA_KEY_MAX_LUMA",VDP_VIDEO_MIXER_ATTRIBUTE_LUMA_KEY_MAX_LUMA},
+{"BACKGROUND_COLOR",VDP_VIDEO_MIXER_ATTRIBUTE_BACKGROUND_COLOR,DT_NONE},
+{"CSC_MATRIX",VDP_VIDEO_MIXER_ATTRIBUTE_CSC_MATRIX,DT_NONE},
+{"NOISE_REDUCTION_LEVEL",VDP_VIDEO_MIXER_ATTRIBUTE_NOISE_REDUCTION_LEVEL,DT_FLOAT},
+{"SHARPNESS_LEVEL",VDP_VIDEO_MIXER_ATTRIBUTE_SHARPNESS_LEVEL,DT_FLOAT},
+{"LUMA_KEY_MIN_LUMA",VDP_VIDEO_MIXER_ATTRIBUTE_LUMA_KEY_MIN_LUMA,DT_NONE},
+{"LUMA_KEY_MAX_LUMA",VDP_VIDEO_MIXER_ATTRIBUTE_LUMA_KEY_MAX_LUMA,DT_NONE},
 };
 const size_t mixer_attributes_count = sizeof(mixer_attributes)/sizeof(Desc);
+
+void display_range(uint32_t aux, uint32_t minval, uint32_t maxval)
+{
+    switch(aux)
+    {
+        case DT_INT: printf("%8i %8i", minval, maxval); break;
+        case DT_UINT: printf("%8u %8u", minval, maxval); break;
+        case DT_FLOAT: printf("%8.2f %8.2f", *((float*)&minval), *((float*)&maxval)); break;
+        default: /* Ignore value which we don't know how to display */;
+    }
+}
 
 void queryVideoMixer(VDPDeviceImpl *device)
 {
@@ -261,7 +282,8 @@ void queryVideoMixer(VDPDeviceImpl *device)
             uint32_t minval, maxval;
             rv = device->VideoMixerQueryParameterValueRange(device->device, mixer_parameters[x].id, 
                 (void*)&minval, (void*)&maxval);
-            printf("%08x %08x", minval, maxval);
+            if(rv == VDP_STATUS_OK)
+                display_range(mixer_parameters[x].aux, minval, maxval);
         }
         printf("\n");
     }
@@ -270,7 +292,7 @@ void queryVideoMixer(VDPDeviceImpl *device)
     // Attributes (+range)
     printf("attribute name                  sup      min      max\n");
     printf("-----------------------------------------------------\n");
-    for(int x=0; x<mixer_parameters_count; ++x)
+    for(int x=0; x<mixer_attributes_count; ++x)
     {
         VdpBool is_supported;
 
@@ -284,7 +306,8 @@ void queryVideoMixer(VDPDeviceImpl *device)
             uint32_t minval, maxval;
             rv = device->VideoMixerQueryAttributeValueRange(device->device, mixer_parameters[x].id, 
                 (void*)&minval, (void*)&maxval);
-            printf("%08x %08x", minval, maxval);
+            if(rv == VDP_STATUS_OK)
+                display_range(mixer_attributes[x].aux, minval, maxval);
         }
         printf("\n");
     }
