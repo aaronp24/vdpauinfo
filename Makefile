@@ -1,4 +1,4 @@
-CXXFLAGS=-O3 -ffast-math -g -march=opteron 
+CXXFLAGS=-O3 -g
 LDFLAGS=-lvdpau -lX11
 
 PROGRAMS=vdpinfo

@@ -255,8 +255,7 @@ void queryVideoMixer(VDPDeviceImpl *device)
     printf("------------------------------------\n");
     for(int x=0; x<mixer_features_count; ++x)
     {
-        VdpBool is_supported;
-
+        VdpBool is_supported = false; /* There seems to be a bug in VideoMixerQueryFeatureSupport, is_supported sometimes isn't written even though the operation was succesfuls */
         rv = device->VideoMixerQueryFeatureSupport(device->device, mixer_features[x].id, 
             &is_supported);
         is_supported = (rv == VDP_STATUS_OK && is_supported);
