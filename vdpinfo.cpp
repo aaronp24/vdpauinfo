@@ -334,19 +334,19 @@ void queryDecoderCaps(VDPDeviceImpl *device)
 {
     VdpStatus rv;
     printf("\nDecoder capabilities:\n\n");
-    printf("name          level ref width height\n");
+    printf("name          level macbs width height\n");
     printf("------------------------------------\n");
     for(int x=0; x<decoder_profile_count; ++x)
     {
         VdpBool is_supported = false;
-        uint32_t max_level, max_references, max_width, max_height;
+        uint32_t max_level, max_macroblocks, max_width, max_height;
 
         rv = device->DecoderQueryCapabilities(device->device, decoder_profiles[x].id, 
-            &is_supported, &max_level, &max_references, &max_width, &max_height);
+            &is_supported, &max_level, &max_macroblocks, &max_width, &max_height);
         if(rv == VDP_STATUS_OK && is_supported)
         {
-            printf("%-16s %2i %2i %5i %5i\n", decoder_profiles[x].name, 
-                max_level, max_references, max_width, max_height);
+            printf("%-16s %2i %5i %5i %5i\n", decoder_profiles[x].name, 
+                max_level, max_macroblocks, max_width, max_height);
         }
     }
 }

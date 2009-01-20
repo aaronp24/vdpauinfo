@@ -9,4 +9,4 @@ vdpinfo: vdpinfo.o
 	$(CXX)   -o $@ $^  $(LDFLAGS)
 
 clean:
-	rm -f *.o $(PROGRAMS)
+	rm -f *.o $(PROGRAMS) *~
