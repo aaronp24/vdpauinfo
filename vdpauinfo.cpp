@@ -360,7 +360,7 @@ int main(int argc, char **argv)
     char *display_name = XDisplayName(NULL);
     if ((display=XOpenDisplay(display_name)) == NULL)
     {
-        fprintf(stderr,"vdpinfo: cannot connect to X server %s\n",
+        fprintf(stderr,"vdpauinfo: cannot connect to X server %s\n",
               XDisplayName(display_name));
         exit(-1);
     }

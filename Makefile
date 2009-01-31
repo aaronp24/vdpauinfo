@@ -1,11 +1,11 @@
 CXXFLAGS=-O3 -g
 LDFLAGS=-lvdpau -lX11
 
-PROGRAMS=vdpinfo
+PROGRAMS=vdpauinfo
 
 all: $(PROGRAMS)
 
-vdpinfo: vdpinfo.o
+vdpauinfo: vdpauinfo.o
 	$(CXX)   -o $@ $^  $(LDFLAGS)
 
 clean:
