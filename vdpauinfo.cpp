@@ -216,6 +216,15 @@ Desc mixer_features[] = {
 {"NOISE_REDUCTION",VDP_VIDEO_MIXER_FEATURE_NOISE_REDUCTION},
 {"SHARPNESS",VDP_VIDEO_MIXER_FEATURE_SHARPNESS},
 {"LUMA_KEY",VDP_VIDEO_MIXER_FEATURE_LUMA_KEY},
+{"HIGH QUALITY SCALING - L1", VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L1},
+{"HIGH QUALITY SCALING - L2", VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L2},
+{"HIGH QUALITY SCALING - L3", VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L3},
+{"HIGH QUALITY SCALING - L4", VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L4},
+{"HIGH QUALITY SCALING - L5", VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L5},
+{"HIGH QUALITY SCALING - L6", VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L6},
+{"HIGH QUALITY SCALING - L7", VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L7},
+{"HIGH QUALITY SCALING - L8", VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L8},
+{"HIGH QUALITY SCALING - L9", VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L9},
 };
 const size_t mixer_features_count = sizeof(mixer_features)/sizeof(Desc);
 
@@ -318,15 +327,25 @@ void queryVideoMixer(VDPDeviceImpl *device)
 /******************* Decoder ****************/
 
 Desc decoder_profiles[] = {
-{"MPEG1",        VDP_DECODER_PROFILE_MPEG1},
-{"MPEG2_SIMPLE", VDP_DECODER_PROFILE_MPEG2_SIMPLE},
-{"MPEG2_MAIN",   VDP_DECODER_PROFILE_MPEG2_MAIN},
-{"H264_BASELINE",VDP_DECODER_PROFILE_H264_BASELINE},
-{"H264_MAIN",    VDP_DECODER_PROFILE_H264_MAIN},
-{"H264_HIGH",    VDP_DECODER_PROFILE_H264_HIGH},
-{"VC1_SIMPLE",   VDP_DECODER_PROFILE_VC1_SIMPLE},
-{"VC1_MAIN",     VDP_DECODER_PROFILE_VC1_MAIN},
-{"VC1_ADVANCED", VDP_DECODER_PROFILE_VC1_ADVANCED},
+{"MPEG1",              VDP_DECODER_PROFILE_MPEG1},
+{"MPEG2_SIMPLE",       VDP_DECODER_PROFILE_MPEG2_SIMPLE},
+{"MPEG2_MAIN",         VDP_DECODER_PROFILE_MPEG2_MAIN},
+{"H264_BASELINE",      VDP_DECODER_PROFILE_H264_BASELINE},
+{"H264_MAIN",          VDP_DECODER_PROFILE_H264_MAIN},
+{"H264_HIGH",          VDP_DECODER_PROFILE_H264_HIGH},
+{"VC1_SIMPLE",         VDP_DECODER_PROFILE_VC1_SIMPLE},
+{"VC1_MAIN",           VDP_DECODER_PROFILE_VC1_MAIN},
+{"VC1_ADVANCED",       VDP_DECODER_PROFILE_VC1_ADVANCED},
+{"MPEG4_PART2_SP",     VDP_DECODER_PROFILE_MPEG4_PART2_SP},
+{"MPEG4_PART2_ASP",    VDP_DECODER_PROFILE_MPEG4_PART2_ASP},
+{"DIVX4_QMOBILE",      VDP_DECODER_PROFILE_DIVX4_QMOBILE},
+{"DIVX4_MOBILE",       VDP_DECODER_PROFILE_DIVX4_MOBILE},
+{"DIVX4_HOME_THEATER", VDP_DECODER_PROFILE_DIVX4_HOME_THEATER},
+{"DIVX4_HD_1080P",     VDP_DECODER_PROFILE_DIVX4_HD_1080P},
+{"DIVX5_QMOBILE",      VDP_DECODER_PROFILE_DIVX5_QMOBILE},
+{"DIVX5_MOBILE",       VDP_DECODER_PROFILE_DIVX5_MOBILE},
+{"DIVX5_HOME_THEATER", VDP_DECODER_PROFILE_DIVX5_HOME_THEATER},
+{"DIVX5_HD_1080P",     VDP_DECODER_PROFILE_DIVX5_HD_1080P},
 };
 const size_t decoder_profile_count = sizeof(decoder_profiles)/sizeof(Desc);
 
@@ -334,8 +353,8 @@ void queryDecoderCaps(VDPDeviceImpl *device)
 {
     VdpStatus rv;
     printf("\nDecoder capabilities:\n\n");
-    printf("name          level macbs width height\n");
-    printf("------------------------------------\n");
+    printf("name               level macbs width height\n");
+    printf("-------------------------------------------\n");
     for(int x=0; x<decoder_profile_count; ++x)
     {
         VdpBool is_supported = false;
@@ -345,7 +364,7 @@ void queryDecoderCaps(VDPDeviceImpl *device)
             &is_supported, &max_level, &max_macroblocks, &max_width, &max_height);
         if(rv == VDP_STATUS_OK && is_supported)
         {
-            printf("%-16s %2i %5i %5i %5i\n", decoder_profiles[x].name, 
+            printf("%-20s %2i %5i %5i %5i\n", decoder_profiles[x].name, 
                 max_level, max_macroblocks, max_width, max_height);
         }
     }
