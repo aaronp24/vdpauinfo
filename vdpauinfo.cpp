@@ -287,7 +287,8 @@ void queryVideoMixer(VDPDeviceImpl *device)
         is_supported = (rv == VDP_STATUS_OK && is_supported);
         printf("%-32s %c  ", mixer_parameters[x].name, 
             is_supported?'y':'-');
-        if(is_supported)
+        /* VDPAU spec does not allow range query for DT_NONE types */
+        if(is_supported && mixer_parameters[x].aux != DT_NONE)
         {
             uint32_t minval, maxval;
             rv = device->VideoMixerQueryParameterValueRange(device->device, mixer_parameters[x].id, 
@@ -311,7 +312,8 @@ void queryVideoMixer(VDPDeviceImpl *device)
         is_supported = (rv == VDP_STATUS_OK && is_supported);
         printf("%-32s %c  ", mixer_attributes[x].name, 
             is_supported?'y':'-');
-        if(is_supported)
+        /* VDPAU spec does not allow range query for DT_NONE types */
+        if(is_supported && mixer_attributes[x].aux != DT_NONE)
         {
             uint32_t minval, maxval;
             rv = device->VideoMixerQueryAttributeValueRange(device->device, mixer_parameters[x].id, 
