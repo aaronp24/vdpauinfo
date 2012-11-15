@@ -1,5 +1,5 @@
-/* 
-Query and display NVIDIA VDPAU capabilities, a la glxinfo 
+/*
+Query and display NVIDIA VDPAU capabilities, a la glxinfo
 version 0.0.2
 
 Copyright (c) 2008 Wladimir J. van der Laan
@@ -48,7 +48,7 @@ void queryBaseInfo(VDPDeviceImpl *device)
        device->GetInformationString(&info) != VDP_STATUS_OK)
     {
         fprintf(stderr, "Error querying API version or information\n");
-        exit(-1);    
+        exit(-1);
     }
     printf("API version: %i\n", api);
     printf("Information string: %s\n", info);
@@ -114,11 +114,11 @@ void queryVideoSurface(VDPDeviceImpl *device)
         VdpBool is_supported = false;
         uint32_t max_width, max_height;
 
-        rv = device->VideoSurfaceQueryCapabilities(device->device, chroma_types[x].id, 
+        rv = device->VideoSurfaceQueryCapabilities(device->device, chroma_types[x].id,
             &is_supported, &max_width, &max_height);
         if(rv == VDP_STATUS_OK && is_supported)
         {
-            printf("%-6s %5i %5i  ", chroma_types[x].name, 
+            printf("%-6s %5i %5i  ", chroma_types[x].name,
                 max_width, max_height);
             /* Find out supported formats */
             for(int y=0; y<ycbcr_type_count; ++y)
@@ -149,13 +149,13 @@ void queryOutputSurface(VDPDeviceImpl *device)
         VdpBool is_supported, native=false;
         uint32_t max_width, max_height;
 
-        rv = device->OutputSurfaceQueryCapabilities(device->device, rgb_types[x].id, 
+        rv = device->OutputSurfaceQueryCapabilities(device->device, rgb_types[x].id,
             &is_supported, &max_width, &max_height);
         device->OutputSurfaceQueryGetPutBitsNativeCapabilities(device->device, rgb_types[x].id,
             &native);
         if(rv == VDP_STATUS_OK && is_supported)
         {
-            printf("%-16s %5i %5i    %c  ", rgb_types[x].name, 
+            printf("%-16s %5i %5i    %c  ", rgb_types[x].name,
                 max_width, max_height, native?'y':'-');
             /* Find out supported formats */
             for(int y=0; y<ycbcr_type_count; ++y)
@@ -188,11 +188,11 @@ void queryBitmapSurface(VDPDeviceImpl *device)
         VdpBool is_supported;
         uint32_t max_width, max_height;
 
-        rv = device->BitmapSurfaceQueryCapabilities(device->device, rgb_types[x].id, 
+        rv = device->BitmapSurfaceQueryCapabilities(device->device, rgb_types[x].id,
             &is_supported, &max_width, &max_height);
         if(rv == VDP_STATUS_OK && is_supported)
         {
-            printf("%-16s %5i %5i\n", rgb_types[x].name, 
+            printf("%-16s %5i %5i\n", rgb_types[x].name,
                 max_width, max_height);
         }
     }
@@ -267,12 +267,12 @@ void queryVideoMixer(VDPDeviceImpl *device)
     for(int x=0; x<mixer_features_count; ++x)
     {
         VdpBool is_supported = true; /* There seems to be a bug in VideoMixerQueryFeatureSupport, is_supported is only set if the feature is not supported */
-        rv = device->VideoMixerQueryFeatureSupport(device->device, mixer_features[x].id, 
+        rv = device->VideoMixerQueryFeatureSupport(device->device, mixer_features[x].id,
             &is_supported);
         is_supported = (rv == VDP_STATUS_OK && is_supported);
-        printf("%-32s %c\n", mixer_features[x].name, 
+        printf("%-32s %c\n", mixer_features[x].name,
             is_supported?'y':'-');
-       
+
     }
     printf("\n");
     // Parameters (+range)
@@ -282,15 +282,16 @@ void queryVideoMixer(VDPDeviceImpl *device)
     {
         VdpBool is_supported = false;
 
-        rv = device->VideoMixerQueryParameterSupport(device->device, mixer_parameters[x].id, 
+        rv = device->VideoMixerQueryParameterSupport(device->device, mixer_parameters[x].id,
             &is_supported);
         is_supported = (rv == VDP_STATUS_OK && is_supported);
-        printf("%-32s %c  ", mixer_parameters[x].name, 
+        printf("%-32s %c  ", mixer_parameters[x].name,
             is_supported?'y':'-');
-        if(is_supported)
+        /* VDPAU spec does not allow range query for DT_NONE types */
+        if(is_supported && mixer_parameters[x].aux != DT_NONE)
         {
             uint32_t minval, maxval;
-            rv = device->VideoMixerQueryParameterValueRange(device->device, mixer_parameters[x].id, 
+            rv = device->VideoMixerQueryParameterValueRange(device->device, mixer_parameters[x].id,
                 (void*)&minval, (void*)&maxval);
             if(rv == VDP_STATUS_OK)
                 display_range(mixer_parameters[x].aux, minval, maxval);
@@ -298,7 +299,7 @@ void queryVideoMixer(VDPDeviceImpl *device)
         printf("\n");
     }
     printf("\n");
-    
+
     // Attributes (+range)
     printf("attribute name                  sup      min      max\n");
     printf("-----------------------------------------------------\n");
@@ -306,22 +307,23 @@ void queryVideoMixer(VDPDeviceImpl *device)
     {
         VdpBool is_supported = false;
 
-        rv = device->VideoMixerQueryAttributeSupport(device->device, mixer_attributes[x].id, 
+        rv = device->VideoMixerQueryAttributeSupport(device->device, mixer_attributes[x].id,
             &is_supported);
         is_supported = (rv == VDP_STATUS_OK && is_supported);
-        printf("%-32s %c  ", mixer_attributes[x].name, 
+        printf("%-32s %c  ", mixer_attributes[x].name,
             is_supported?'y':'-');
-        if(is_supported)
+        /* VDPAU spec does not allow range query for DT_NONE types */
+        if(is_supported && mixer_attributes[x].aux != DT_NONE)
         {
             uint32_t minval, maxval;
-            rv = device->VideoMixerQueryAttributeValueRange(device->device, mixer_parameters[x].id, 
+            rv = device->VideoMixerQueryAttributeValueRange(device->device, mixer_parameters[x].id,
                 (void*)&minval, (void*)&maxval);
             if(rv == VDP_STATUS_OK)
                 display_range(mixer_attributes[x].aux, minval, maxval);
         }
         printf("\n");
     }
-    printf("\n");    
+    printf("\n");
 }
 
 /******************* Decoder ****************/
@@ -360,11 +362,11 @@ void queryDecoderCaps(VDPDeviceImpl *device)
         VdpBool is_supported = false;
         uint32_t max_level, max_macroblocks, max_width, max_height;
 
-        rv = device->DecoderQueryCapabilities(device->device, decoder_profiles[x].id, 
+        rv = device->DecoderQueryCapabilities(device->device, decoder_profiles[x].id,
             &is_supported, &max_level, &max_macroblocks, &max_width, &max_height);
         if(rv == VDP_STATUS_OK && is_supported)
         {
-            printf("%-20s %2i %5i %5i %5i\n", decoder_profiles[x].name, 
+            printf("%-20s %2i %5i %5i %5i\n", decoder_profiles[x].name,
                 max_level, max_macroblocks, max_width, max_height);
         }
     }
@@ -385,7 +387,7 @@ int main(int argc, char **argv)
     }
     screen = DefaultScreen(display);
     printf("display: %s   screen: %i\n", display_name, screen);
-    
+
     /* Create device */
     VdpDevice device;
     VdpGetProcAddress *get_proc_address;
@@ -395,10 +397,10 @@ int main(int argc, char **argv)
     {
         fprintf(stderr, "Error creating VDPAU device: %i\n", rv); /* cannot use GetErrorString here */
         exit(-1);
-    }    
-    
+    }
+
     VDPDeviceImpl *impl = new VDPDeviceImpl(device, get_proc_address);
-    
+
     queryBaseInfo(impl);
     queryVideoSurface(impl);
     queryDecoderCaps(impl);
