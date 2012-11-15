@@ -1,6 +1,5 @@
 /*
 Query and display NVIDIA VDPAU capabilities, a la glxinfo
-version 0.0.2
 
 Copyright (c) 2008 Wladimir J. van der Laan
 
@@ -410,4 +409,3 @@ int main(int argc, char **argv)
 
     printf("\n");
 }
-
