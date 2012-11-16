@@ -161,7 +161,7 @@ void queryOutputSurface(VDPDeviceImpl *device)
             {
                 is_supported = false;
                 rv = device->OutputSurfaceQueryPutBitsYCbCrCapabilities(
-                    device->device, chroma_types[x].id, ycbcr_types[y].id,
+                    device->device, rgb_types[x].id, ycbcr_types[y].id,
                     &is_supported);
                 if(rv == VDP_STATUS_OK && is_supported)
                 {
