@@ -25,8 +25,6 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 */
 /// TODO
-/// - possible bug, querying VDP_CHROMA_TYPE_444 returns an error
-///  (VDP_STATUS_INVALID_CHROMA_TYPE) is this NVIDIA or us?
 /// - parse display/screen from command line
 /// - list color table formats for queryOutputSurface
 
