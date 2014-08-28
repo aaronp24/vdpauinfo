@@ -2,6 +2,7 @@
 Query and display NVIDIA VDPAU capabilities, a la glxinfo
 
 Copyright (c) 2008 Wladimir J. van der Laan
+Copyright (c) 2014 NVIDIA Corporation
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -25,11 +26,12 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 */
 /// TODO
-/// - parse display/screen from command line
 /// - list color table formats for queryOutputSurface
 
+#include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <vdpau/vdpau.h>
 #include <vdpau/vdpau_x11.h>
 
@@ -368,21 +370,98 @@ void queryDecoderCaps(VDPDeviceImpl *device)
     }
 }
 
+static void usage(const char *argv0) _X_NORETURN;
+static void usage(const char *argv0)
+{
+    printf("Usage: %s [--display displayname] [--screen screen_number]\n", argv0);
+    printf("  --display displayname     Server to query\n");
+    printf("  --screen screen_number    X screen to query\n");
+    printf("  --help                    Print this help text\n");
+    exit(0);
+}
+
+static void invalid_argument(const char *argv0, const char *fmt, ...) _X_ATTRIBUTE_PRINTF(2, 3) _X_NORETURN;
+static void invalid_argument(const char *argv0, const char *fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+
+    fprintf(stderr, "%s: ", argv0);
+    vfprintf(stderr, fmt, ap);
+    fprintf(stderr, "Try '%s --help' for more information.\n", argv0);
+
+    va_end(ap);
+    exit(-1);
+}
+
+struct Options {
+    char *display_name;
+    int screen;
+};
+
+static struct Options parse_options(int argc, char **argv)
+{
+    struct Options o;
+
+    o.display_name = XDisplayName(NULL);
+    o.screen = -1;
+
+    for(int i = 1; i < argc;)
+    {
+        const char *arg = argv[i++];
+
+        if(strcmp(arg, "--display") == 0)
+        {
+            if(i >= argc)
+                invalid_argument(argv[0], "--display requires an argument\n");
+            o.display_name = XDisplayName(argv[i++]);
+        }
+        else if(strcmp(arg, "--screen") == 0)
+        {
+            if(i >= argc)
+                invalid_argument(argv[0], "--screen requires an argument\n");
+
+            char *end;
+            o.screen = strtol(argv[i], &end, 0);
+            if(end == argv[i] || *end != '\0')
+                invalid_argument(argv[0], "could not parse '%s' as a number\n", argv[i]);
+            if(o.screen < 0)
+                invalid_argument(argv[0], "--screen argument cannot be negative\n");
+            i++;
+        }
+        else if(strcmp(arg, "-h") == 0 || strcmp(arg, "--help") == 0)
+        {
+            usage(argv[0]);
+        }
+        else
+        {
+            invalid_argument(argv[0], "unrecognized option '%s'\n", arg);
+        }
+    }
+
+    return o;
+}
 
 int main(int argc, char **argv)
 {
+    /* Parse options */
+    struct Options o = parse_options(argc, argv);
+
     /* Create an X Display */
-    Display *display;
-    int screen;
-    char *display_name = XDisplayName(NULL);
-    if ((display=XOpenDisplay(display_name)) == NULL)
+    Display *display = XOpenDisplay(o.display_name);
+    if(!display)
     {
-        fprintf(stderr,"vdpauinfo: cannot connect to X server %s\n",
-              XDisplayName(display_name));
+        fprintf(stderr,"%s: cannot connect to X server %s\n", argv[0],
+                o.display_name);
         exit(-1);
     }
-    screen = DefaultScreen(display);
-    printf("display: %s   screen: %i\n", display_name, screen);
+
+    int screen = (o.screen == -1) ? DefaultScreen(display) : o.screen;
+    if(screen >= ScreenCount(display))
+        invalid_argument(argv[0], "screen %d requested but X server only has %d screen%s\n",
+                         screen, ScreenCount(display),
+                         ScreenCount(display) == 1 ? "" : "s");
+    printf("display: %s   screen: %i\n", o.display_name, screen);
 
     /* Create device */
     VdpDevice device;
