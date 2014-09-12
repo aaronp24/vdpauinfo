@@ -25,8 +25,6 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 */
-/// TODO
-/// - list color table formats for queryOutputSurface
 
 #include <stdarg.h>
 #include <stdlib.h>
@@ -96,11 +94,6 @@ Desc indexed_types[] = {
 };
 const size_t indexed_type_count = sizeof(indexed_types)/sizeof(Desc);
 
-Desc color_table_formats[] = {
-{"B8G8R8X8", VDP_COLOR_TABLE_FORMAT_B8G8R8X8},
-};
-const size_t color_table_format_count = sizeof(color_table_formats)/sizeof(Desc);
-
 
 void queryVideoSurface(VDPDeviceImpl *device)
 {
@@ -166,11 +159,24 @@ void queryOutputSurface(VDPDeviceImpl *device)
                     printf("%s ", ycbcr_types[y].name);
                 }
             }
+
+            for(int y=0; y<indexed_type_count; ++y)
+            {
+                // There is currently only one color table format.  This will
+                // have to be reconsidered if additional color table formats are
+                // added.
+                rv = device->OutputSurfaceQueryPutBitsIndexedCapabilities(
+                    device->device, rgb_types[x].id, indexed_types[y].id,
+                    VDP_COLOR_TABLE_FORMAT_B8G8R8X8, &is_supported);
+                if(rv == VDP_STATUS_OK && is_supported)
+                {
+                    printf("%s ", indexed_types[y].name);
+                }
+            }
+
             printf("\n");
         }
     }
-    // OutputSurfaceQueryPutBitsIndexedCapabilities
-    //   rgba, idx, colortable -> supported
 }
 
 /***************** Bitmap surface ****************/
