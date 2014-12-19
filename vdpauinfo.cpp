@@ -377,6 +377,8 @@ void queryDecoderCaps(VDPDeviceImpl *device)
         {
             printf("%-30s %2i %5i %5i %5i\n", decoder_profiles[x].name,
                 max_level, max_macroblocks, max_width, max_height);
+        } else {
+            printf("%-30s --- not supported ---\n", decoder_profiles[x].name);
         }
     }
 }
