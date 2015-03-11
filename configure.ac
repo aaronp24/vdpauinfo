@@ -1,5 +1,5 @@
 AC_PREREQ([2.57])
-AC_INIT(vdpauinfo,[0.9],[xorg@lists.freedesktop.org],vdpauinfo)
+AC_INIT(vdpauinfo,[1.0],[xorg@lists.freedesktop.org],vdpauinfo)
 AM_INIT_AUTOMAKE([dist-bzip2 foreign])
 AM_MAINTAINER_MODE
 
