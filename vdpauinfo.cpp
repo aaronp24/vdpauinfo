@@ -74,6 +74,8 @@ Desc ycbcr_types[] = {
 {"YUYV", VDP_YCBCR_FORMAT_YUYV},
 {"Y8U8V8A8", VDP_YCBCR_FORMAT_Y8U8V8A8},
 {"V8U8Y8A8", VDP_YCBCR_FORMAT_V8U8Y8A8},
+{"NV24", VDP_YCBCR_FORMAT_Y_UV_444},
+{"YV24", VDP_YCBCR_FORMAT_Y_U_V_444},
 };
 const size_t ycbcr_type_count = sizeof(ycbcr_types)/sizeof(Desc);
 
